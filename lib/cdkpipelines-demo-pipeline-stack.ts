@@ -4,6 +4,7 @@ import {
   CodePipeline,
   CodePipelineSource,
   ShellStep,
+  ManualApprovalStep
 } from "@aws-cdk/pipelines";
 
 /**
@@ -27,12 +28,19 @@ export class CdkpipelinesDemoPipelineStack extends Stack {
       }),
     });
 
+    const prod = new CdkpipelinesDemoStage(this, "Prod", {
+      env: { account: "649017397503", region: "us-east-1"}
+    });
+
     // This is where we add the application stages
     // ...
     pipeline.addStage(
       new CdkpipelinesDemoStage(this, "PreProd", {
         env: { account: "649017397503", region: "us-east-1"},
-      })
+      })  
     )
+    pipeline.addStage(prod, {
+      pre: [new ManualApprovalStep("PromoteToProd")],
+    });
   }
 }
